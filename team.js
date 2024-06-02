@@ -11,17 +11,18 @@ class Team {
         this.name = name;
         this.members = [];
     }
-    addMember(Member) {
-        this.members.push(Member);
+
+    addMember(member) {
+        this.members.push(member);
     }
-    
-    deleteMember(Member) {
-        let index = this.members.indexOf(Member); 
-        this.members.splice(index, 1);
+
+    deleteMember(member) {
+        let index = this.members.indexOf(member); 
+        if (index !== -1) {
+            this.members.splice(index, 1);
+        }
     }
 }
-
-
 
 let teams = [];
 let teamId = 0;
@@ -48,19 +49,17 @@ function drawDOM() {
         let table = createTeamTable(team);
         let title = document.createElement('h2');
         title.innerHTML = team.name;
-        title.appendChild(createDeleteTeamButton(team))
-        //title.appendChild(title);
-       // title.appendChild(table);
+        title.appendChild(createDeleteTeamButton(team));
         teamDiv.appendChild(title);
         teamDiv.appendChild(table);
         for (let member of team.members) {
-            createMemberRow(team, table, member)
+            createMemberRow(team, table, member);
         }
     }
 }
 
 function createMemberRow(team, table, member) {
-    let row = table.insertRow(2);
+    let row = table.insertRow(-1);  // Use -1 to insert at the end of the table
     row.insertCell(0).innerHTML = member.name;
     row.insertCell(1).innerHTML = member.position;
     let actions = row.insertCell(2);
@@ -69,73 +68,77 @@ function createMemberRow(team, table, member) {
 
 function createDeleteRowButton(team, member) {
     let btn = document.createElement('button');
-    btn.className = 'btn btn=primary';
+    btn.className = 'btn btn-primary';
     btn.innerHTML = 'Delete';
     btn.onclick = () => {
-        let index = teams.indexOf(team);
-        teams.splice(index, 1);
+        team.deleteMember(member);
         drawDOM();
     };
     return btn;
-    }
+}
 
-    function createDeleteTeamButton(team) {
-        let btn = document.createElement("button");
-        btn.className = "btn btn-primary";
-        btn.innerHTML = "Delete Team";
-        btn.onclick = () => {
-          let index = teams.indexOf(team);
-          teams.splice(index, 1);
-          drawDOM();
-        };
-        return btn;
-      }
-      
-    function createNewMemberButton(team) {
-        let btn = document.createElement('button');
-        btn.className = 'btn btn-primary';
-        btn.innerHTML = 'Create';
-        btn.onclick = () => {
-            team.members.push(new Member(
-                getValue(`name-input-${team.id}`),
-            getValue(`position-input-${team.id}`)));
-            drawDOM();
-        };
-        return btn;
+function createDeleteTeamButton(team) {
+    let btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.innerHTML = 'Delete Team';
+    btn.onclick = () => {
+        let index = teams.indexOf(team);
+        if (index !== -1) {
+            teams.splice(index, 1);
         }
+        drawDOM();
+    };
+    return btn;
+}
 
-        function createTeamTable(team) {
-            let table = document.createElement('table');
-            table.setAttribute('class', 'table table-dark table-striped');
-            let row = table.insertRow(0);
-            let nameColumn = document.createElement('th');
-            let positionColumn = document.createElement('th');
-            nameColumn.innerHTML = 'Name';
-            positionColumn.innerHTML = 'Position';
-            row.appendChild(nameColumn);
-            row.appendChild(positionColumn);
-            let formRow = table.insertRow(1);
-            let nameTh = document.createElement('th');
-            let positionTh = document.createElement('th');
-            let createTh = document.createElement('th');
-            let nameInput = document.createElement('input');
-            nameInput.setAttribute('id', `position-input-${team.id}`);
-            nameInput.setAttribute('type', 'text');
-            nameInput.setAttribute('class', 'form-control');
-            let positionInput = document.createElement('input');
-            positionInput.setAttribute('id', `name-input-${team.id}`);
-            let newMemberButton = createNewMemberButton(team);
-            nameTh.appendChild(nameInput);
-            positionTh.appendChild(positionInput);
-            createTh.appendChild(newMemberButton);
-            formRow.appendChild(nameTh);
-            formRow.appendChild(positionTh);
-            formRow.appendChild(createTh);
-            return table;
-        }
+function createNewMemberButton(team) {
+    let btn = document.createElement('button');
+    btn.className = 'btn btn-primary';
+    btn.innerHTML = 'Create';
+    btn.onclick = () => {
+        team.addMember(new Member(
+            getValue(`name-input-${team.id}`),
+            getValue(`position-input-${team.id}`)
+        ));
+        drawDOM();
+    };
+    return btn;
+}
+
+function createTeamTable(team) {
+    let table = document.createElement('table');
+    table.setAttribute('class', 'table table-dark table-striped');
+    let row = table.insertRow(0);
+    let nameColumn = document.createElement('th');
+    let positionColumn = document.createElement('th');
+    nameColumn.innerHTML = 'Name';
+    positionColumn.innerHTML = 'Position';
+    row.appendChild(nameColumn);
+    row.appendChild(positionColumn);
+    let formRow = table.insertRow(1);
+    let nameTh = document.createElement('th');
+    let positionTh = document.createElement('th');
+    let createTh = document.createElement('th');
+    let nameInput = document.createElement('input');
+    nameInput.setAttribute('id', `name-input-${team.id}`);
+    nameInput.setAttribute('type', 'text');
+    nameInput.setAttribute('class', 'form-control');
+    let positionInput = document.createElement('input');
+    positionInput.setAttribute('id', `position-input-${team.id}`);
+    positionInput.setAttribute('type', 'text');
+    positionInput.setAttribute('class', 'form-control');
+    let newMemberButton = createNewMemberButton(team);
+    nameTh.appendChild(nameInput);
+    positionTh.appendChild(positionInput);
+    createTh.appendChild(newMemberButton);
+    formRow.appendChild(nameTh);
+    formRow.appendChild(positionTh);
+    formRow.appendChild(createTh);
+    return table;
+}
 
 function clearElement(element) {
-    while(element.firstChild) {
+    while (element.firstChild) {
         element.removeChild(element.firstChild);
     }
 }
